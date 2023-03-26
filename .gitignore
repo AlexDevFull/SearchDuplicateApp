@@ -1,0 +1,9 @@
+main.spec
+/dist
+/build
+/buildold
+/testcode
+/venv
+/venvold
+**/__pycache__
+/.idea

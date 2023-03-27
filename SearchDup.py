@@ -2,6 +2,9 @@ import os
 
 
 class SearchDuplicate:
+    file_dic = {}
+    result_dic = {}
+
     def __init__(self, initial_search_path):
         self.initial_search_path = self.standardizes_url(initial_search_path)
 
@@ -15,62 +18,77 @@ class SearchDuplicate:
     def file_crawling(self):
         path = self.initial_search_path
         os.chdir(f"{path}")
-        file_dic = {}
-        compare = []
 
         def recursive_crawling(path):
             search = os.listdir(path)
-            for i in search:
+            for file_name in search:
+                full_file_name = path + file_name
+                file_size = self.file_size(full_file_name)
                 try:
-                    if os.path.isdir(i):
-                        recursive_crawling(path + i + "/")
+                    if os.path.isdir(full_file_name):
+                        recursive_crawling(full_file_name + "/")
                     else:
-                        if i in map(self.clean_file_name, file_dic):
-                            gen_file = self.run_dic(file_dic, i, self.file_size(path + i))
-                            if gen_file:
-                                compare.append([(path + i, self.file_size(path + i)), (gen_file[0], gen_file[-1])])
+                        if self.check_exist_in_dictionary(file_name):
+                            origin_file_data = self.get_values_dic(file_name, file_size)
+                            if origin_file_data:
+                                origin_file_name, origin_file_size = origin_file_data
+                                if origin_file_name not in self.result_dic:
+                                    self.result_dic[origin_file_name] = [[full_file_name], file_size]
+                                else:
+                                    self.result_dic[origin_file_name] = [
+                                        self.result_dic[origin_file_name][0] + [full_file_name], file_size]
                             else:
-                                file_dic[path + i] = self.file_size(path + i)
+                                self.adds_result_to_dictionary(full_file_name)
                         else:
-                            file_dic[path + i] = self.file_size(path + i)
+                            self.adds_result_to_dictionary(full_file_name)
                 except NotADirectoryError:
                     continue
-                    file_dic[i] = self.file_size(path + i)
 
         recursive_crawling(path)
-        print(compare)
-        return compare
 
-    def file_size(self, file):
+    @property
+    def get_compare(self) -> dict:
+        return self.result_dic
+
+    def check_exist_in_dictionary(self, file_name: str) -> bool:
+        """ --- Проверяет есть ли ссылка на файл в словаре --- """
+        return file_name in map(self.clean_file_name, self.file_dic)
+
+    def adds_result_to_dictionary(self, file_name: str) -> None:
+        """ --- Добавляет ссылку на файл и размер файла в словарь --- """
+        self.file_dic[file_name] = self.file_size(file_name)
+
+    def file_size(self, file: str) -> int:
         """ --- Возвращает размер файла в байтах --- """
         return os.stat(file).st_size
 
-    def clean_file_name(self, path):
+    def clean_file_name(self, path: str) -> str:
         """ --- Возбращает имя файла без пути --- """
         file_name = path.split('/')[-1]
         return file_name
 
-    def run_dic(self, dic, i, size):
-        """ --- Возвращает имя и размер файла который идентичен тому что есть --- """
-        repeat_name_dic = {}
-        for k, v in dic.items():
-            if self.clean_file_name(k) == i:
-                repeat_name_dic[k] = v
-                for k, v in repeat_name_dic.items():
-                    if v == size:
-                        return k, v
+    def get_values_dic(self, file_name: str, size: int) -> tuple:
+        """ --- Возвращает имя и размер файла из словаря который идентичен найденному --- """
+        for key, value in self.file_dic.items():
+            if self.clean_file_name(key) == file_name and value == size:
+                return key, value
 
-    def save_result_infile(self, result):
+    def save_result_infile(self, result) -> None:
         """ --- Записывает результаты в файл --- """
         with open('duplicates.txt', 'w') as f:
-            for i in result:
-                res = f'файл - \t\t{i[1][0]}\t размер: {i[1][1]} \n\tдубль - {i[0][0]}\t размер: {i[0][1]}\n\n\n'
+            for origin_file, duplicate_files_and_size in result.items():
+                res = f'файл - \t\t{origin_file}\t размер: {duplicate_files_and_size[1]}\n'
                 f.write(res)
+                for duplicate_files in duplicate_files_and_size[0]:
+                    res = f'\tдубль - {duplicate_files}\t размер: {duplicate_files_and_size[1]}\n'
+                    f.write(res)
+                f.write('\n')
 
 
 def main(initial_search_path):
     obj = SearchDuplicate(initial_search_path)
-    result = obj.file_crawling()
+    obj.file_crawling()
+    result = obj.get_compare
     obj.save_result_infile(result)
 
 

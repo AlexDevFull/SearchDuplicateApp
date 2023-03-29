@@ -85,7 +85,7 @@ class SearchDuplicate:
                 f.write('\n')
 
 
-def main(initial_search_path):
+def search_starts(initial_search_path):
     obj = SearchDuplicate(initial_search_path)
     obj.file_crawling()
     result = obj.get_compare
@@ -93,4 +93,4 @@ def main(initial_search_path):
 
 
 if __name__ == '__main__':
-    main('D:\TestFolder\\')
+    search_starts('D:\TestFolder\\')

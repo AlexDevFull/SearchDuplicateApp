@@ -1,4 +1,5 @@
 from GUI.mainGUI import Ui_MainWindow
+from GUI.resultGUI import Ui_ResultWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 from search_duplicate import search_starts
@@ -28,7 +29,7 @@ class PathLabel(Ui_MainWindow):
         return self.path_label.toPlainText()
 
 
-class GUIActions(QtWidgets.QMainWindow, PathLabel, Ui_MainWindow):
+class MainGUIActions(QtWidgets.QMainWindow, PathLabel, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -44,13 +45,35 @@ class GUIActions(QtWidgets.QMainWindow, PathLabel, Ui_MainWindow):
 
     def activates_search_button(self):
         path = self.get_value_path_text
-        search_starts(f'{path}/')
+        results_dictionary = search_starts(f'{path}/')
+        self.open_new_window(results_dictionary)
+
+    def open_new_window(self, results_dictionary: dict):
+        self.ResultWindow = ResultGUIActions(results_dictionary)
+        self.ResultWindow.show()
+
+
+class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
+    def __init__(self, results_dic):
+        self.results_dic = results_dic
+        super().__init__()
+        self.setupUi(self)
+        self.form_change()
+
+    def form_change(self):
+        self.original_listWidget.addItems(self.results_dic.keys())
+        self.original_listWidget.itemClicked.connect(self.shows_result_duplicates)
+
+    def shows_result_duplicates(self, item):
+        self.dup_listWidget.clear()
+        key = item.text()
+        self.dup_listWidget.addItems(self.results_dic[key])
 
 
 def application():
     app = QtWidgets.QApplication(sys.argv)
 
-    MainWindow = GUIActions()
+    MainWindow = MainGUIActions()
     MainWindow.show()
 
     sys.exit(app.exec_())

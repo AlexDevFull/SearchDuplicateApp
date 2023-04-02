@@ -90,8 +90,11 @@ class SearchDuplicate:
 def search_starts(initial_search_path):
     obj = SearchDuplicate(initial_search_path)
     obj.file_crawling()
+    # Результатирующий словарь оригинальных файлов с их размерами
     # result = obj.get_origin_files
+    # Результатирующий словарь оригинальных файлов с их дублями
     result = obj.get_duplicate_files
+    return result
 
 
 if __name__ == '__main__':

@@ -4,6 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 from search_duplicate import search_starts
 import sys
+import os
 
 
 class PathLabel(Ui_MainWindow):
@@ -63,11 +64,20 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
     def form_change(self):
         self.original_listWidget.addItems(self.results_dic.keys())
         self.original_listWidget.itemClicked.connect(self.shows_result_duplicates)
+        self.original_listWidget.itemDoubleClicked.connect(self.open_file_in_program)
+        self.dup_listWidget.itemDoubleClicked.connect(self.open_file_in_program)
+
+    def test(self, item):
+        print(item)
 
     def shows_result_duplicates(self, item):
         self.dup_listWidget.clear()
         key = item.text()
         self.dup_listWidget.addItems(self.results_dic[key])
+
+    def open_file_in_program(self, item):
+        """ Открывает файлы в программе по умолчанию Windows """
+        os.startfile(item.text())
 
 
 def application():

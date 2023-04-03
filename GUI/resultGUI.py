@@ -25,6 +25,8 @@ class Ui_ResultWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.title_label = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setFamily("MS Sans Serif")
@@ -33,7 +35,13 @@ class Ui_ResultWindow(object):
         font.setWeight(75)
         self.title_label.setFont(font)
         self.title_label.setObjectName("title_label")
-        self.verticalLayout_2.addWidget(self.title_label)
+        self.horizontalLayout_2.addWidget(self.title_label)
+        self.del_pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.del_pushButton.setEnabled(False)
+        self.del_pushButton.setAutoRepeatDelay(300)
+        self.del_pushButton.setObjectName("del_pushButton")
+        self.horizontalLayout_2.addWidget(self.del_pushButton)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.original_listWidget = QtWidgets.QListWidget(self.centralwidget)
@@ -52,6 +60,7 @@ class Ui_ResultWindow(object):
         _translate = QtCore.QCoreApplication.translate
         ResultWindow.setWindowTitle(_translate("ResultWindow", "Search result"))
         self.title_label.setText(_translate("ResultWindow", "TextLabel"))
+        self.del_pushButton.setText(_translate("ResultWindow", "Delete File"))
 
 
 if __name__ == "__main__":

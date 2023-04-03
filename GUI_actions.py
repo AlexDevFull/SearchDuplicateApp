@@ -2,6 +2,7 @@ from GUI.mainGUI import Ui_MainWindow
 from GUI.resultGUI import Ui_ResultWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtCore import QFile
 from search_duplicate import search_starts
 import sys
 import os
@@ -60,15 +61,45 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
         super().__init__()
         self.setupUi(self)
         self.form_change()
+        self.work_path = ''
 
     def form_change(self):
         self.original_listWidget.addItems(self.results_dic.keys())
         self.original_listWidget.itemClicked.connect(self.shows_result_duplicates)
         self.original_listWidget.itemDoubleClicked.connect(self.open_file_in_program)
         self.dup_listWidget.itemDoubleClicked.connect(self.open_file_in_program)
+        self.dup_listWidget.itemClicked.connect(self.get_full_path)
+        self.del_pushButton.pressed.connect(self.move_to_trash)
 
-    def test(self, item):
-        print(item)
+    def get_full_path(self, item):
+        """ Получает имя файла и записывает его в переменную """
+        self.work_path = item.text()
+        self.activates_delete_button(True)
+
+    def activates_delete_button(self, flag: bool):
+        self.del_pushButton.setEnabled(flag)
+
+    def move_to_trash(self):
+        """ Перемещает файл в корзину """
+        QFile.moveToTrash(self.work_path)
+        update_duplicate_list = self.return_update_duplicates_list(self.work_path)
+        self.show_update_duplicates_list(update_duplicate_list)
+
+    def return_update_duplicates_list(self, elem):
+        """ Возвращает новый список дубликатов после удаления элемента """
+        for key, value in self.results_dic.items():
+            for k, item in enumerate(value):
+                if item == elem:
+                    del value[k]
+                    if value == []:
+                        self.activates_delete_button(False)
+                    return value
+                else:
+                    continue
+
+    def show_update_duplicates_list(self, dup_list: list):
+        self.dup_listWidget.clear()
+        self.dup_listWidget.addItems(dup_list)
 
     def shows_result_duplicates(self, item):
         self.dup_listWidget.clear()

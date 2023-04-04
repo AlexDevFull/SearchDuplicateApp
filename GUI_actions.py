@@ -64,7 +64,7 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
         self.work_path = ''
 
     def form_change(self):
-        self.original_listWidget.addItems(self.results_dic.keys())
+        self.add_values_original_in_form()
         self.original_listWidget.itemClicked.connect(self.shows_result_duplicates)
         self.original_listWidget.itemDoubleClicked.connect(self.open_file_in_program)
         self.dup_listWidget.itemDoubleClicked.connect(self.open_file_in_program)
@@ -79,11 +79,22 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
     def activates_delete_button(self, flag: bool):
         self.del_pushButton.setEnabled(flag)
 
+    def add_values_original_in_form(self):
+        """ Добавляет в форму значения оригиналов из словаря """
+        self.original_listWidget.clear()
+        self.original_listWidget.addItems(self.results_dic.keys())
+
     def move_to_trash(self):
         """ Перемещает файл в корзину """
         QFile.moveToTrash(self.work_path)
         update_duplicate_list = self.return_update_duplicates_list(self.work_path)
         self.show_update_duplicates_list(update_duplicate_list)
+        self.activates_delete_button(False)
+
+    def remove_key_without_values(self):
+        """ Удаляет ключ из словаря с пустым значением """
+        dic = self.results_dic
+        self.results_dic = dict(filter(lambda x: x[1], dic.items()))
 
     def return_update_duplicates_list(self, elem):
         """ Возвращает новый список дубликатов после удаления элемента """
@@ -93,6 +104,8 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
                     del value[k]
                     if value == []:
                         self.activates_delete_button(False)
+                        self.remove_key_without_values()
+                        self.add_values_original_in_form()
                     return value
                 else:
                     continue

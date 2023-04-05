@@ -10,6 +10,7 @@ import os
 
 class PathLabel(Ui_MainWindow):
     """ Класс обработки выбора пути поиска """
+    actual_path = ""
 
     def _choise_path_in_explorer(self) -> None:
         """ Функция выбора активации окна проводника windows """
@@ -24,6 +25,9 @@ class PathLabel(Ui_MainWindow):
     def _append_path_in_label(self, path):
         # Добавляет значение в поле "путь для поиска"
         self.path_label.append(path)
+        if path != self.actual_path:
+            self.search_btn.setEnabled(True)
+            self.actual_path = path
 
     @property
     def get_value_path_text(self) -> str:
@@ -48,7 +52,15 @@ class MainGUIActions(QtWidgets.QMainWindow, PathLabel, Ui_MainWindow):
     def activates_search_button(self):
         path = self.get_value_path_text
         results_dictionary = search_starts(f'{path}/')
-        self.open_new_window(results_dictionary)
+        if results_dictionary:
+            self.open_new_window(results_dictionary)
+            self.search_btn.setEnabled(False)
+        else:
+            self.change_process_label("Nothing found")
+            self.search_btn.setEnabled(False)
+
+    def change_process_label(self, message):
+        self.process_label.setText(message)
 
     def open_new_window(self, results_dictionary: dict):
         self.ResultWindow = ResultGUIActions(results_dictionary)
@@ -64,7 +76,7 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
         self.work_path = ''
 
     def form_change(self):
-        self.add_values_original_in_form()
+        self.update_values_original_in_form()
         self.original_listWidget.itemClicked.connect(self.shows_result_duplicates)
         self.original_listWidget.itemDoubleClicked.connect(self.open_file_in_program)
         self.dup_listWidget.itemDoubleClicked.connect(self.open_file_in_program)
@@ -79,7 +91,7 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
     def activates_delete_button(self, flag: bool):
         self.del_pushButton.setEnabled(flag)
 
-    def add_values_original_in_form(self):
+    def update_values_original_in_form(self):
         """ Добавляет в форму значения оригиналов из словаря """
         self.original_listWidget.clear()
         self.original_listWidget.addItems(self.results_dic.keys())
@@ -105,7 +117,7 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
                     if value == []:
                         self.activates_delete_button(False)
                         self.remove_key_without_values()
-                        self.add_values_original_in_form()
+                        self.update_values_original_in_form()
                     return value
                 else:
                     continue

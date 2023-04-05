@@ -2,12 +2,13 @@ import os
 
 
 class SearchDuplicate:
-    name_and_size = {}
-    result_origin_files = {}
-    result_duplicate_files = {}
+
 
     def __init__(self, initial_search_path):
         self.initial_search_path = self.standardizes_url(initial_search_path)
+        self.name_and_size = {}
+        self.result_origin_files = {}
+        self.result_duplicate_files = {}
 
     @staticmethod
     def standardizes_url(url: str) -> str:
@@ -99,3 +100,4 @@ def search_starts(initial_search_path):
 
 if __name__ == '__main__':
     search_starts('D:\TestFolder\\')
+

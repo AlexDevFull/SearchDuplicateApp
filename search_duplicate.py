@@ -1,4 +1,5 @@
 import os
+import traceback
 
 
 class SearchDuplicate:
@@ -39,6 +40,8 @@ class SearchDuplicate:
                         else:
                             self.adds_result_to_dictionary(full_file_name, self.name_and_size)
                 except NotADirectoryError:
+                    continue
+                except PermissionError:
                     continue
 
         recursive_crawling(path)

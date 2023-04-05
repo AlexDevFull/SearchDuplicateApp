@@ -94,7 +94,10 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
     def update_values_original_in_form(self):
         """ Добавляет в форму значения оригиналов из словаря """
         self.original_listWidget.clear()
-        self.original_listWidget.addItems(self.results_dic.keys())
+        if self.results_dic:
+            self.original_listWidget.addItems(self.results_dic.keys())
+        else:
+            ResultGUIActions.close(self)
 
     def move_to_trash(self):
         """ Перемещает файл в корзину """

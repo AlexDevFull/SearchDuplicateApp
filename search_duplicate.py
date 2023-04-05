@@ -3,7 +3,6 @@ import os
 
 class SearchDuplicate:
 
-
     def __init__(self, initial_search_path):
         self.initial_search_path = self.standardizes_url(initial_search_path)
         self.name_and_size = {}
@@ -100,4 +99,3 @@ def search_starts(initial_search_path):
 
 if __name__ == '__main__':
     search_starts('D:\TestFolder\\')
-

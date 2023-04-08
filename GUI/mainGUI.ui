@@ -57,7 +57,7 @@
        </font>
       </property>
       <property name="text">
-       <string>Finish</string>
+       <string/>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>

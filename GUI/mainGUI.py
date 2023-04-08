@@ -40,6 +40,7 @@ class Ui_MainWindow(object):
         font.setFamily("MS Reference Sans Serif")
         font.setPointSize(9)
         self.process_label.setFont(font)
+        self.process_label.setText("")
         self.process_label.setAlignment(QtCore.Qt.AlignCenter)
         self.process_label.setObjectName("process_label")
         self.gridLayout_2.addWidget(self.process_label, 5, 1, 1, 2)
@@ -76,7 +77,6 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Search for Duplicates"))
         self.select_btn.setText(_translate("MainWindow", "select folder"))
-        self.process_label.setText(_translate("MainWindow", "Finish"))
         self.title_label.setText(_translate("MainWindow", "Select a folder to start searching"))
         self.search_btn.setText(_translate("MainWindow", "search"))
 

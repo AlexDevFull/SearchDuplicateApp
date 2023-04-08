@@ -2,10 +2,11 @@ from GUI.mainGUI import Ui_MainWindow
 from GUI.resultGUI import Ui_ResultWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
-from PyQt5.QtCore import QFile
+from PyQt5.QtCore import QFile, QObject, QThread
 from search_duplicate import search_starts
 import sys
 import os
+import time
 
 
 class PathLabel(Ui_MainWindow):
@@ -41,6 +42,8 @@ class MainGUIActions(QtWidgets.QMainWindow, PathLabel, Ui_MainWindow):
         self.setupUi(self)
         self.changes_form()
 
+    results_dictionary = {}
+
     def changes_form(self):
         self.select_btn.clicked.connect(self.activates_select_button)
         self.search_btn.clicked.connect(self.activates_search_button)
@@ -50,21 +53,55 @@ class MainGUIActions(QtWidgets.QMainWindow, PathLabel, Ui_MainWindow):
         self._choise_path_in_explorer()
 
     def activates_search_button(self) -> None:
-        path = self.get_value_path_text
-        results_dictionary = search_starts(f'{path}/')
-        if results_dictionary:
-            self.open_new_window(results_dictionary)
+        self.change_process_label("wait please...")
+        self.new_thread()
+
+    def check_valid(self):
+        if self.results_dictionary:
+            self.open_new_window(self.results_dictionary)
+            self.change_process_label("Done", color="blue")
             self.search_btn.setEnabled(False)
         else:
-            self.change_process_label("Nothing found")
+            self.change_process_label("Nothing found", color="red")
             self.search_btn.setEnabled(False)
 
-    def change_process_label(self, message) -> None:
+    def change_process_label(self, message: str, color: str = "black") -> None:
+        self.process_label.setStyleSheet(f"color: {color}")
         self.process_label.setText(message)
 
     def open_new_window(self, results_dictionary: dict) -> None:
         self.ResultWindow = ResultGUIActions(results_dictionary)
         self.ResultWindow.show()
+
+    def new_thread(self):
+        path = self.get_value_path_text
+        # Создаём новый объект
+        self.obj = Searching(path)
+        # Создаём поток
+        self.t = QThread()
+        # Помещаем созданный объект в поток
+        self.obj.moveToThread(self.t)
+        # коннектимся к сигналу начала потока и запускаем метод который должен выполнятся в отдельном потоке
+        self.t.started.connect(self.obj.searching_dublicates)
+        # коннектимся к сигналу завершения потока и запускаем метод который выходит из потока
+        self.t.finished.connect(self.t.quit)
+        # коннектимся к сигналукоторый создали сами и запускаем метод который что-то делает по завершению кода в выполняемой функции
+        self.obj.finishSignal.connect(self.check_valid)
+        # запускаем поток
+        self.t.start()
+        self.t.quit()
+
+
+class Searching(MainGUIActions, QObject):
+    def __init__(self, path):
+        super(Searching, self).__init__()
+        self.path = path
+
+    finishSignal = QtCore.pyqtSignal(int)
+
+    def searching_dublicates(self):
+        MainGUIActions.results_dictionary = search_starts(f'{self.path}/')
+        self.finishSignal.emit(1)
 
 
 class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):

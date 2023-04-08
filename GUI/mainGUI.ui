@@ -31,6 +31,10 @@
   <property name="windowTitle">
    <string>Search for Duplicates</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../search_duplicate.ico</normaloff>../search_duplicate.ico</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="3" column="1">

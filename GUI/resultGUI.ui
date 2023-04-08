@@ -18,6 +18,10 @@
   <property name="windowTitle">
    <string>Search result</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../search_duplicate.ico</normaloff>../search_duplicate.ico</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="font">
     <font>

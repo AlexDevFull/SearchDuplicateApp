@@ -105,6 +105,10 @@ class Searching(MainGUIActions, QObject):
 
 
 class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
+    PICTURE_FILE_EXTENSIONS = ('.jpg', '.jpeg', '.jp2', '.tif', '.tiff', '.png', '.gif', '.bmp', '.dib')
+    VIDEO_FILE_EXTENSIONS = ('.wmv', '.rmvb', '.rm', '.mpg', '.mpeg', '.mp4', '.mov', '.mkv', '.m4v', '.flv', '.avi')
+    DOCUMENT_FILE_EXTENSIONS = ('.txt', 'doc', 'docx', '.xls', '.xlsx')
+
     def __init__(self, results_dic):
         self.results_dic = results_dic
         super().__init__()
@@ -114,12 +118,14 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
         self.work_path = ''
 
     def changes_form(self):
-        self.update_values_original_in_form()
+        self.update_values_original_in_form(self.results_dic)
         self.original_listWidget.itemClicked.connect(self.shows_result_duplicates)
         self.original_listWidget.itemDoubleClicked.connect(self.open_file_in_program)
         self.dup_listWidget.itemDoubleClicked.connect(self.open_file_in_program)
         self.dup_listWidget.itemClicked.connect(self.get_full_path)
         self.del_pushButton.pressed.connect(self.move_to_trash)
+        self.buttonGroup.buttonClicked.connect(self._on_radio_button_clicked)
+        # self.picture_radioButton_radioButton.clicked.connect(self._on_radio_button_clicked)
 
     def get_full_path(self, item) -> None:
         """ Получает имя файла и записывает его в переменную """
@@ -129,13 +135,15 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
     def activates_delete_button(self, flag: bool) -> None:
         self.del_pushButton.setEnabled(flag)
 
-    def update_values_original_in_form(self) -> None:
+    def update_values_original_in_form(self, res_dic: dict) -> None:
         """ Добавляет в форму значения оригиналов из словаря """
         self.original_listWidget.clear()
-        if self.results_dic:
-            self.original_listWidget.addItems(self.results_dic.keys())
-        else:
+        if not res_dic and self.all_radioButton.isChecked():
             ResultGUIActions.close(self)
+        elif not res_dic:
+            self.original_listWidget.addItems(res_dic.keys())
+        else:
+            self.original_listWidget.addItems(res_dic.keys())
 
     def move_to_trash(self) -> None:
         """ Перемещает файл в корзину """
@@ -159,7 +167,8 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
                     if value == []:
                         self.activates_delete_button(False)
                         self.remove_key_without_values()
-                        self.update_values_original_in_form()
+                        self.all_radioButton.setChecked(True)
+                        self.update_values_original_in_form(self.results_dic)
                     return value
                 else:
                     continue
@@ -192,6 +201,37 @@ class ResultGUIActions(QtWidgets.QMainWindow, Ui_ResultWindow):
     def open_file_in_program(self, item) -> None:
         """ Открывает файлы в программе по умолчанию Windows """
         os.startfile(item.text())
+
+    def _on_radio_button_clicked(self, button):
+        if button.text() == 'All Files':
+            self.dup_listWidget.clear()
+            self.changes_title(self.results_dic)
+            self.update_values_original_in_form(self.results_dic)
+        if button.text() == 'Pictures':
+            new_dic = self.get_new_filtered_dic(self.PICTURE_FILE_EXTENSIONS)
+            self.dup_listWidget.clear()
+            self.changes_title(new_dic)
+            self.update_values_original_in_form(new_dic)
+        if button.text() == 'Videos':
+            new_dic = self.get_new_filtered_dic(self.VIDEO_FILE_EXTENSIONS)
+            self.dup_listWidget.clear()
+            self.changes_title(new_dic)
+            self.update_values_original_in_form(new_dic)
+        if button.text() == 'Documents':
+            new_dic = self.get_new_filtered_dic(self.DOCUMENT_FILE_EXTENSIONS)
+            self.dup_listWidget.clear()
+            self.changes_title(new_dic)
+            self.update_values_original_in_form(new_dic)
+
+    def get_new_filtered_dic(self, tup: tuple):
+        """ Формирует новый словарь с отфильтрованными файлами """
+        dic = {}
+        for k, v in self.results_dic.items():
+            if k.endswith(tup):
+                dic[k] = v
+            else:
+                continue
+        return dic
 
 
 def application():
